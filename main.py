@@ -22,7 +22,8 @@ urls = {}
 
 @app.get("/")
 def home():
-    return { ... }
+    return {"message": "Welcome to the DevOps Tools API!",
+        "docs_url": "/docs"}
 
 @app.get("/health")
 def health():
@@ -52,14 +53,16 @@ def decode_base64(data: TextInput):
 def shorten_url(data: URLInput):
     code = str(uuid.uuid4())[:8]
     urls[code] = data.url
-    return { ... }
+    return {"message": "associated UUID with url",
+            "uuid": code 
+            }
 
 @app.get("/s/{code}")
 def get_url(code: str):
     if code not in urls:
         raise HTTPException(404, "URL not found")
     long_url = urls[code]    
-    return RedirectResponse(url=long_url, status_code=307)
+    return{"url": long_url}
 
 @app.get("/stats")
 def stats():

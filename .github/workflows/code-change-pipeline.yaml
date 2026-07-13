@@ -1,0 +1,12 @@
+name: "code changes workflow"
+on:
+    workflow_dispatch:
+
+permissions:
+    contents: write
+
+jobs:
+    build-and-deploy:
+        runs-on: ubuntu-latest
+
+#gotta finish the pipeline when i finish the infra

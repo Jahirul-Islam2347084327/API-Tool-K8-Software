@@ -82,14 +82,20 @@ jobs:
       - name: Update Kubernetes manifest
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          # Expose the token as an environment variable to use it easily
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
         run: |
           sed -i "s|image:.*|image: $ECR_REGISTRY/url-app:${{ github.sha }}|g" ./kubernetes/manifest/deployment.yaml
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-
-          git remote set-url origin https://x-access-token:${{ steps.generate-token.outputs.token }}@github.com/Jahirul-Islam2347084327/API-Tool-K8-Infrastructure.git
-
+          
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Set the remote URL with the token directly
+          git remote set-url origin https://x-access-token:$GH_TOKEN@github.com/Jahirul-Islam2347084327/API-Tool-K8-Infrastructure.git
+          
           git add kubernetes/manifest/deployment.yaml
           git commit -m "Update image to ${{ github.sha }}"
-          git push
+          
+          # Push using the tokenized remote
+          git push origin HEAD:main
      

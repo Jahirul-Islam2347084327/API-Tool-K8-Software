@@ -1,12 +1,92 @@
-name: "code changes workflow"
+name: Deploy api app on AWS
+
 on:
     workflow_dispatch:
-
 permissions:
-    contents: write
+    id-token: write
+    contents: read
+    #push:
+        #branches: [main]
+        #paths:
+            #- Dockerfile
+            #- main.py
+
+
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: url-app
 
 jobs:
-    build-and-deploy:
-        runs-on: ubuntu-latest
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-#gotta finish the pipeline when i finish the infra
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: "arn:aws:iam::565895652873:role/github_OIDC"
+          aws-region: us-east-1
+
+      - name: Login to Amazon ECR 
+        id: login-ecr 
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build Docker image
+        run: docker build -t app-url:${{ github.sha }} -f Dockerfile .
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'app-url:${{ github.sha }}'
+          format: 'table'
+          exit-code: '0' 
+          ignore-unfixed: true 
+          vuln-type: 'os,library'
+          severity: 'CRITICAL'
+
+      - name: Tag image
+        env:
+         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+         ECR_REPOSITORY: app-url
+         IMAGE_TAG: ${{ github.sha }}
+
+        run: |
+          docker tag app-url:${{ github.sha }} $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+      - name: Push image to ECR
+        env:
+         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+         ECR_REPOSITORY: app-url
+         IMAGE_TAG: ${{ github.sha }} 
+
+        run: | 
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+      - name: Generate GitHub App Token
+        id: generate-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ secrets.CLIENT_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+      
+      - name: Checkout Receiver Repo
+        uses: actions/checkout@v4
+        with:
+          repository: Jahirul-Islam2347084327/API-Tool-K8-Infrastructure
+          token: ${{ steps.generate-token.outputs.token }}
+        
+      - name: Update Kubernetes manifest
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          sed -i "s|image:.*|image: $ECR_REGISTRY/url-app:${{ github.sha }}|g" ./kubernetes/manifest/deployment.yaml
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add kubernetes/manifest/deployment.yaml
+          git commit -m "Update image to ${{ github.sha }}"
+          git push
+     

@@ -78,7 +78,8 @@ jobs:
         with:
           repository: Jahirul-Islam2347084327/API-Tool-K8-Infrastructure
           token: ${{ steps.generate-token.outputs.token }}
-        
+          persist-credentials: false
+          
       - name: Update Kubernetes manifest
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}

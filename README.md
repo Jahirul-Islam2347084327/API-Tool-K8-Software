@@ -25,9 +25,9 @@ This repository houses the source code, container configuration, and automated C
 
 ## Application Components
 
-* **FastAPI (`app/main.py`)**: A lightweight, high-performance Python application providing DevOps utility endpoints.
-* **Dependencies (`app/requirements.txt`)**: Manages core libraries, primarily `fastapi` and `uvicorn`.
-* **Containerisation (`app/Dockerfile`)**: Multi-stage or optimized single-stage build containerizing the Python runtime, installing dependencies, and running under a secure, non-root user profile.
+* **FastAPI (`main.py`)**: A lightweight, high-performance Python application providing DevOps utility endpoints.
+* **Dependencies (`requirements.txt`)**: Manages core libraries, primarily `fastapi` and `uvicorn`.
+* **Containerisation (`Dockerfile`)**: Multi-stage or optimized single-stage build containerizing the Python runtime, installing dependencies, and running under a secure, non-root user profile.
 
 ---
 
@@ -35,7 +35,7 @@ This repository houses the source code, container configuration, and automated C
 
 The automated pipeline handles continuous integration and continuous delivery for code changes:
 
-1. **Trigger**: Activated automatically on every push to the `main` branch affecting files within the `/app` folder.
+1. **Trigger**: Activated automatically on every push to the `main` branch affecting files within the `main.py` or `Dockerfile` file.
 2. **Vulnerability Scanning**: Runs **Trivy** to scan the built Docker image for vulnerabilities before pushing to production registries.
 3. **Build & Tag**: Builds the Docker image using the unique **Git commit SHA** as the container image tag to ensure strict traceability.
 4. **Registry Push**: Authenticates with AWS and pushes the newly tagged image to **Amazon ECR**.
@@ -60,29 +60,21 @@ The automated pipeline handles continuous integration and continuous delivery fo
 * Docker installed
 
 ### Run Locally
-
-1. Navigate to the app directory:
-```bash
-cd app
-
-```
-
-
-2. Install dependencies:
+1. Install dependencies:
 ```bash
 pip install -r requirements.txt
 
 ```
 
 
-3. Run the application locally with Uvicorn:
+2. Run the application locally with Uvicorn:
 ```bash
 uvicorn main:app --reload --port 8080
 
 ```
 
 
-4. Access the API locally at:
+3. Access the API locally at:
 ```text
 http://localhost:8080/docs
 
@@ -93,7 +85,7 @@ http://localhost:8080/docs
 ### Build & Run Docker Container Locally
 
 ```bash
-docker build -t devops-api:local ./app
+docker build -t devops-api:local
 docker run -p 8080:8080 devops-api:local
 
 ```

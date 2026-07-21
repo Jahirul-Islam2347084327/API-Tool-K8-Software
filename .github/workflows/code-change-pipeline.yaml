@@ -66,20 +66,12 @@ jobs:
         run: | 
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-      - name: Generate GitHub App Token
-        id: generate-token
-        uses: actions/create-github-app-token@v3
-        with:
-          client-id: ${{ secrets.CLIENT_ID }}
-          private-key: ${{ secrets.APP_PRIVATE_KEY }}
-      
       - name: Checkout Receiver Repo
         uses: actions/checkout@v4
         with:
           repository: Jahirul-Islam2347084327/API-Tool-K8-Infrastructure
-          token: ${{ steps.generate-token.outputs.token }}
-          
-
+          token: ${{ secrets.GH_PAT }}
+      
       - name: Update Kubernetes manifest
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}

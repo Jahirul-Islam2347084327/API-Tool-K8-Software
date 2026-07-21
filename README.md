@@ -33,13 +33,15 @@ This repository houses the source code, container configuration, and automated C
 
 ## CI/CD Pipeline (`code-change-pipeline.yml`)
 
+<img width="1909" height="1048" alt="image" src="https://github.com/user-attachments/assets/48195a0a-0a65-4bc0-9448-a26af6253684" />
+
 The automated pipeline handles continuous integration and continuous delivery for code changes:
 
 1. **Trigger**: Activated automatically on every push to the `main` branch affecting files within the `main.py` or `Dockerfile` file.
 2. **Vulnerability Scanning**: Runs **Trivy** to scan the built Docker image for vulnerabilities before pushing to production registries.
 3. **Build & Tag**: Builds the Docker image using the unique **Git commit SHA** as the container image tag to ensure strict traceability.
 4. **Registry Push**: Authenticates with AWS and pushes the newly tagged image to **Amazon ECR**.
-5. **Manifest Update**: Automatically modifies the `k8s/deployment.yml` manifest file (or syncs with the infrastructure repository) to reference the new image tag.
+5. **Manifest Update**: Automatically modifies the `kubernetes/manifest/deployment.yml` manifest file (or syncs with the infrastructure repository) to reference the new image tag.
 6. **GitOps Synchronization**: Commits the updated manifest back to the repository, where **ArgoCD** instantly detects the change and rolls out the update to the AWS EKS cluster with zero downtime.
 
 ---

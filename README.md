@@ -12,10 +12,10 @@ This repository houses the source code, container configuration, and automated C
 ├── .github
 │   └── workflows
 │       └── code-change-pipeline.yml
-├── app
-│   ├── Dockerfile
-│   ├── main.py
-│   └── requirements.txt
+├
+│── Dockerfile
+│── main.py
+│── requirements.txt
 ├── .gitignore
 └── README.md
 
